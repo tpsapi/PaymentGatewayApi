@@ -5,16 +5,16 @@ info:
     This a TPS payment Gateway Integration API. To mainly support autorizations and advice transactions
 
     
-  termsOfService: https://liquid.tech/terms/
+  termsOfService: https://tpspay.com/terms/
   contact:
-    email: posservice@liquid.tech
+    email: PoSService@tpspay.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.12
+  version: 1.0.0
 externalDocs:
   description: Find out more about TPS Gateway
-  url: https://liquid.tech
+  url: https://tpspay.com
 servers:
   - url: http://DeviceIP:8005/api/v1
 tags:
