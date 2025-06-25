@@ -1,6 +1,6 @@
 openapi: 3.0.4
 info:
-  title: BPC-TPS Payment Gateway 1.0
+  title: BPC-TPS Payment Gateway Integration API 1.0
   description: |-
     This a TPS payment Gateway Integration API. To mainly support autorizations and advice transactions
 
