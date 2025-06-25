@@ -1,0 +1,617 @@
+openapi: 3.0.4
+info:
+  title: BPC-TPS Payment Gateway 1.0
+  description: |-
+    This a TPS payment Gateway Integration API. To mainly support autorizations and advice transactions
+
+    
+  termsOfService: https://liquid.tech/terms/
+  contact:
+    email: edwin.dzamara@liquid.tech
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: Find out more about TPS Gateway
+  url: https://liquid.tech
+servers:
+  - url: http://DeviceIP:8005/api/v1
+tags:
+  - name: authorization
+    description: Everything about your Authorization for supported transactions. So far supporting Sale, Refund and Void
+   
+  - name: advice
+    description: Notifies payment system thata transaction has already occured and should be recorded, but it does not require real-time approval or denial
+    
+  - name: reports
+    description: used to query reports from pos terminals. reports to query include summary and batch report.
+   
+ 
+paths:
+  /auth:
+    post:
+      tags:
+        - authorization
+      summary: Authorise a transaction with bank host system.
+      description: Supported Transaction Types are as follows Sale=> "01", refund=> "03" Void=> "08" Refund Void=> "39". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
+      operationId: /payment
+      parameters:
+      - name: DeviceId
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: API-KEY
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: make payment authorization, refund or void
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/auth'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/auth'
+        required: true
+      responses:
+        '200':
+          description: Successful operation. Transaction authorised or declined by host. need to check further on response code received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/authResponse'
+        '400':
+          description: Invalid Device ID. in this case static MAC Address of workstation
+        '404':
+          description: Transaction record not found
+        '422':
+          description: Api Key Validation exception
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+  /advice:
+    post:
+      tags:
+        - advice
+      summary: For use with notifying bank host system on any changes done.
+      description: Supported Transaction Types are as follows Reversal=> "04", settlement Report=> "10". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
+      operationId: /advice
+      parameters:
+      - name: DeviceId
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: API-KEY
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: make payment authorization, refund or void
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/advice'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/advice'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/advice'
+        required: true
+      responses:
+        '200':
+          description: Successful operation. Transaction authorised or declined by host. need to check further on response code received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/adviceResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/adviceResponse'
+        '400':
+          description: Invalid Device ID. in this case static MAC Address of workstation
+        '404':
+          description: Transaction record not found
+        '422':
+          description: Api Key Validation exception
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+  /report:
+    post:
+      tags:
+        - reports
+      summary: For querying transaction details from pos device.
+      description: Supported Transaction Types are as follows summary report=> "70", batch Report=> "80". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
+      operationId: /report
+      parameters:
+      - name: DeviceId
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: API-KEY
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: make payment authorization, refund or void
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/reports'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/reports'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/reports'
+        required: true
+      responses:
+        '200':
+          description: Successful operation. Transaction authorised or declined by host. need to check further on response code received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/reportsResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/reportsResponse'
+        '400':
+          description: Invalid Device ID. in this case static MAC Address of workstation
+        '404':
+          description: Transaction record not found
+        '422':
+          description: Api Key Validation exception
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  
+  
+components:
+  schemas:
+    authResponse:
+        type: object
+        properties:
+          transType:
+            type: string
+            description: Type of transaction (e.g., "01" for payment, "03" for refund)
+            example: "01"
+          sequenceNo:
+            type: string
+            description: Unique sequence number for the transaction. takes up to 12 characters
+            example: "123456"
+          responseCode:
+              type: string
+              description: Response code indicating transaction result. possible outcomes=> "00" or "01"
+              example: "00"
+          responseText:
+              type: string
+              description: Response text indicating transaction result
+              example: "Approved"
+          rrn:
+            type: string
+            description: Retrival Refrence Number (takes up to 12 digits and numeric only)
+            example: "123456789012"
+          currencyNumber:
+            type: string
+            description: ISO currency number (e.g., "840" for USD)
+            example: "0840"
+          authCode:
+            type: string
+            description: Authorization code from issuer
+            example: "123456"
+          pan:
+            type: string
+            description: Primary Account Number (only for card payments)
+            nullable: true
+            example: "435101XXXXX17681"
+          cardexpiry:
+            type: string
+            description: Card expiry date in MMYY format (only for card payments)
+            nullable: true
+            example: "1299"
+          mobileNumber:
+            type: string
+            description: Mobile number used for payment (only for mobile payments)
+            nullable: true
+            example: "263771XXX118"
+          transAmount:
+            type: number
+            format: float
+            description: Transaction amount
+            example: 149.99
+          transDateTime:
+            type: string
+            format: date-time
+            description: Date and time of transaction
+            example: "2025-06-22T17:45:00Z"
+          terminalId:
+            type: string
+            description: Terminal identifier
+            example: "TEST0093"
+          merchantId:
+            type: string
+            description: Merchant identifier
+            example: "M12341234512345"
+          merchantName:
+            type: string
+            description: Merchant name
+            example: "Tech Store"
+          addr1:
+            type: string
+            description: Address line 1
+            example: "123 Main St"
+          addr2:
+            type: string
+            description: Address line 2
+            example: "Suite 4"
+          addr3:
+            type: string
+            description: City or region
+            example: "Harare"
+        required:
+          - transType
+          - responseCode
+          - currencyNumber
+          - authCode
+          - transAmount
+          - transDateTime
+          - terminalId
+          - merchantId
+          - merchantName
+          - addr1
+          - addr2
+          - addr3
+      
+    auth:
+        type: object
+        properties:
+          transType:
+            type: string
+            description: Type of transaction (e.g., "01" for payment, "03" for refund)
+            example: "01"
+          currencyNumber:
+            type: string
+            description: Currency code (e.g., "0840" for usd)
+            example: "0840"
+          paymentType:
+            type: string
+            description: Mode of payment (e.g., "M" for mobilepayment, "C" for Card payment)
+            example: "C"
+          sequenceNo:
+            type: string
+            description: Unique sequence number for the transaction. takes up to 12 characters
+            example: "123456"
+          rrn:
+            type: string
+            description: Retrival Refrence Number (takes up to 12 digits and numeric only). optional for Void and refund void
+            nullable: true
+            example: "123456789012"
+          transAmount:
+            type: number
+            format: float
+            description: Transaction amount in decimal format
+            example: 149.99
+          dateTime:
+            type: string
+            format: date-time
+            description: ISO 8601 formatted date and time (e.g., "2025-06-22T18:30:00Z")
+            example: "2025-06-22T18:30:00Z"
+        required:
+          - transType
+          - sequenceNo
+          - transAmount
+          - dateTime
+          - curencyNumber
+          - paymentType
+        
+    adviceResponse:
+        type: object
+        properties:
+          transType:
+            type: string
+            description: Type of transaction (e.g., "04" for reversal, "10" for settlement advice)
+            example: "04"
+          sequenceNo:
+            type: string
+            description: Unique sequence number for the transaction. takes up to 12 characters
+            example: "123456"
+          responseCode:
+              type: string
+              description: Response code indicating transaction result. possible outcomes=> "00" or "01"
+              example: "00"
+          responseText:
+              type: string
+              description: Response text indicating transaction result
+              example: "Approved"
+          rrn:
+            type: string
+            description: Retrival Refrence Number (takes up to 12 digits and numeric only)
+            example: "123456789012"
+          currencyNumber:
+            type: string
+            description: ISO currency number (e.g., "840" for USD)
+            example: "0840"
+          totals:
+              type: array
+              nullable: true
+              items:
+                type: object
+                properties:
+                  transname:
+                    type: string
+                    description: Name of the transaction type (e.g., "sale", "void")
+                  count:
+                    type: integer
+                    description: Number of transactions of this type
+                  totalAmount:
+                    type: number
+                    format: float
+                    description: Total amount for this transaction type
+                required:
+                  - transname
+                  - count
+                  - totalAmount
+
+          transDateTime:
+            type: string
+            format: date-time
+            description: Date and time of transaction
+            example: "2025-06-22T17:45:00Z"
+          terminalId:
+            type: string
+            description: Terminal identifier
+            example: "TEST0093"
+          merchantId:
+            type: string
+            description: Merchant identifier
+            example: "M12341234512345"
+          merchantName:
+            type: string
+            description: Merchant name
+            example: "Tech Store"
+          addr1:
+            type: string
+            description: Address line 1
+            example: "123 Main St"
+          addr2:
+            type: string
+            description: Address line 2
+            example: "Suite 4"
+          addr3:
+            type: string
+            description: City or region
+            example: "Harare"
+        required:
+          - transType
+          - responseCode
+          - currencyNumber
+          - transDateTime
+          - terminalId
+          - merchantId
+          - merchantName
+          - addr1
+          - addr2
+          - addr3
+    
+          
+    advice:
+        type: object
+        properties:
+          transType:
+            type: string
+            description: Type of transaction (e.g., "04" for reversal, "10" for settlement)
+            example: "04"
+          currencyNumber:
+            type: string
+            description: Currency code (e.g., "0840" for usd)
+            example: "0840"
+          sequenceNo:
+            type: string
+            description: Unique sequence number for the transaction. takes up to 12 characters
+            example: "123456"
+        
+          transAmount:
+            type: number
+            format: float
+            description: Transaction amount in decimal format
+            example: 149.99
+          dateTime:
+            type: string
+            format: date-time
+            description: ISO 8601 formatted date and time (e.g., "2025-06-22T18:30:00Z")
+            example: "2025-06-22T18:30:00Z"
+        required:
+          - transType
+          - sequenceNo
+          - transAmount
+          - dateTime
+          - curencyNumber
+          
+    reportsResponse:
+        type: object
+        properties:
+          transType:
+            type: string
+            description: Type of transaction (e.g., "70" for summary report, "80" for batch report)
+            example: "04"
+          sequenceNo:
+            type: string
+            description: Unique sequence number for the transaction. takes up to 12 characters
+            example: "123456"
+          responseCode:
+              type: string
+              description: Response code indicating transaction result. possible outcomes=> "00" or "01"
+              example: "00"
+          responseText:
+              type: string
+              description: Response text indicating transaction result
+              example: "Approved"
+         
+          currencyNumber:
+            type: string
+            description: ISO currency number (e.g., "840" for USD)
+            example: "0840"
+          transList:
+              type: array
+              nullable: true
+              items:
+                type: object
+                properties:
+                  transname:
+                    type: string
+                    description: Name of the transaction type (e.g., "sale", "void")
+                  pan:
+                    type: string
+                    description: Primary Account  mobile Number (depends on payment type)
+                    nullable: true
+                    example: "435101XXXXX17681"
+                  transAmount:
+                    type: number
+                    format: float
+                    description: Total amount for this transaction type
+                  transDateTime:
+                    type: string
+                    format: date-time
+                    description: ISO 8601 formatted date and time (e.g., "2025-06-22T18:30:00Z")
+                    example: "2025-06-22T18:30:00Z"
+                  rrn:
+                    type: string
+                    description: Retrival Refrence Number (takes up to 12 digits and numeric only)
+                    example: "123456789012"  
+                required:
+                  - transname
+                  - transDateTime
+                  - totalAmount  
+          totals:
+              type: array
+              nullable: true
+              items:
+                type: object
+                properties:
+                  transname:
+                    type: string
+                    description: Name of the transaction type (e.g., "sale", "void")
+                  count:
+                    type: integer
+                    description: Number of transactions of this type
+                  totalAmount:
+                    type: number
+                    format: float
+                    description: Total amount for this transaction type
+                required:
+                  - transname
+                  - count
+                  - totalAmount
+
+          transDateTime:
+            type: string
+            format: date-time
+            description: Date and time of transaction
+            example: "2025-06-22T17:45:00Z"
+          terminalId:
+            type: string
+            description: Terminal identifier
+            example: "TEST0093"
+          merchantId:
+            type: string
+            description: Merchant identifier
+            example: "M12341234512345"
+          merchantName:
+            type: string
+            description: Merchant name
+            example: "Tech Store"
+          addr1:
+            type: string
+            description: Address line 1
+            example: "123 Main St"
+          addr2:
+            type: string
+            description: Address line 2
+            example: "Suite 4"
+          addr3:
+            type: string
+            description: City or region
+            example: "Harare"
+        required:
+          - transType
+          - responseCode
+          - currencyNumber
+          - transDateTime
+          - terminalId
+          - merchantId
+          - merchantName
+          - addr1
+          - addr2
+          - addr3
+    reports:
+        type: object
+        properties:
+          transType:
+            type: string
+            description: Type of transaction (e.g., "70" for summary report, "80" for batch report)
+            example: "70"
+          currencyNumber:
+            type: string
+            description: Currency code (e.g., "0840" for usd)
+            example: "0840"
+          sequenceNo:
+            type: string
+            description: Unique sequence number for the transaction. takes up to 12 characters
+            example: "123456"
+          dateTime:
+            type: string
+            format: date-time
+            description: ISO 8601 formatted date and time (e.g., "2025-06-22T18:30:00Z")
+            example: "2025-06-22T18:30:00Z"
+        required:
+          - transType
+          - sequenceNo
+          - dateTime
+          - curencyNumber
+        
+   
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          description: Date and time of transaction
+          example: "2025-06-22T17:45:00Z"
+      required:
+        - code
+        - message
+        - timestamp
+        
+        
