@@ -16,7 +16,7 @@ externalDocs:
   description: Find out more about TPS Gateway
   url: https://tpspay.com
 servers:
-  - url: http://DeviceIP:8005/api/v1
+  - url: https://DeviceIP:8005/api/v1
 tags:
   - name: authorization
     description: Everything about your Authorization for supported transactions. So far supporting Sale, Refund and Void
