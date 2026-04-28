@@ -7,8 +7,7 @@ info:
     
   termsOfService: https://tpspay.com/terms/
   contact:
-
-    email: posservice@liquid.tech
+    email: PoSService@tpspay.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -17,7 +16,7 @@ externalDocs:
   description: Find out more about TPS Gateway
   url: https://tpspay.com
 servers:
-  - url: http://DeviceIP:8005/api/v1
+  - url: https://DeviceIP:8005/api/v1
 tags:
   - name: authorization
     description: Everything about your Authorization for supported transactions. So far supporting Sale, Refund and Void
@@ -221,7 +220,7 @@ components:
           currencyNumber:
             type: string
             description: ISO currency number (e.g., "840" for USD)
-            example: "0840"
+            example: "840"
           authCode:
             type: string
             description: Authorization code from issuer
@@ -299,7 +298,7 @@ components:
           currencyNumber:
             type: string
             description: Currency code (e.g., "0840" for usd)
-            example: "0840"
+            example: "840"
           paymentType:
             type: string
             description: Mode of payment (e.g., "M" for mobilepayment, "C" for Card payment)
@@ -357,7 +356,7 @@ components:
           currencyNumber:
             type: string
             description: ISO currency number (e.g., "840" for USD)
-            example: "0840"
+            example: "840"
           totals:
               type: array
               nullable: true
@@ -430,8 +429,8 @@ components:
             example: "04"
           currencyNumber:
             type: string
-            description: Currency code (e.g., "0840" for usd)
-            example: "0840"
+            description: Currency code (e.g., "840" for usd)
+            example: "840"
           sequenceNo:
             type: string
             description: Unique sequence number for the transaction. takes up to 12 characters
@@ -477,7 +476,7 @@ components:
           currencyNumber:
             type: string
             description: ISO currency number (e.g., "840" for USD)
-            example: "0840"
+            example: "840"
           transList:
               type: array
               nullable: true
@@ -579,8 +578,8 @@ components:
             example: "70"
           currencyNumber:
             type: string
-            description: Currency code (e.g., "0840" for usd)
-            example: "0840"
+            description: Currency code (e.g., "840" for usd)
+            example: "840"
           sequenceNo:
             type: string
             description: Unique sequence number for the transaction. takes up to 12 characters
