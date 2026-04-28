@@ -19,10 +19,10 @@ servers:
   - url: https://DeviceIP:8005/api/v1
 tags:
   - name: authorization
-    description: Everything about your Authorization for supported transactions. So far supporting Sale, Refund and Void
+    description: Everything about your Authorization for supported transactions. So far supporting Sale, Preauth, Refund, Void and Refund Void
    
   - name: advice
-    description: Notifies payment system thata transaction has already occured and should be recorded, but it does not require real-time approval or denial
+    description: Notifies payment system thata transaction has already occured and should be recorded, but it does not require real-time approval or denial. This includes reversal, completion, cancel and settlement style flows.
     
   - name: reports
     description: used to query reports and reprints from pos terminals. reports to query include summary, batch report, transaction reprint by reference number, and last transaction reprint.
@@ -34,7 +34,7 @@ paths:
       tags:
         - authorization
       summary: Authorise a transaction with bank host system.
-      description: Supported Transaction Types are as follows Sale=> "01", refund=> "03" Void=> "08" Refund Void=> "39". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
+      description: Supported Transaction Types are as follows Sale=> "01", Preauth=> "05", refund=> "03" Void=> "08" Refund Void=> "39". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
       operationId: /payment
       parameters:
       - name: DeviceId
@@ -48,7 +48,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: make payment authorization, refund or void
+        description: make payment authorization, preauth, refund or void
         content:
           application/json:
             schema:
@@ -88,7 +88,7 @@ paths:
       tags:
         - advice
       summary: For use with notifying bank host system on any changes done.
-      description: Supported Transaction Types are as follows Reversal=> "04", settlement Report=> "10". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
+      description: Supported Transaction Types are as follows Reversal=> "04", Completion=> "06", settlement Report=> "10", Cancel=> "35". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
       operationId: /advice
       parameters:
       - name: DeviceId
@@ -102,7 +102,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: make payment authorization, refund or void
+        description: notify or complete post-authorization transaction flows such as reversal, completion, settlement or cancel
         content:
           application/json:
             schema:
@@ -293,7 +293,7 @@ components:
         properties:
           transType:
             type: string
-            description: Type of transaction (e.g., "01" for payment, "03" for refund)
+            description: Type of transaction (e.g., "01" for payment, "05" for preauth, "03" for refund, "08" for void, "39" for refund void)
             example: "01"
           currencyNumber:
             type: string
@@ -335,7 +335,7 @@ components:
         properties:
           transType:
             type: string
-            description: Type of transaction (e.g., "04" for reversal, "10" for settlement advice)
+            description: Type of transaction (e.g., "04" for reversal, "06" for completion, "10" for settlement advice, "35" for cancel)
             example: "04"
           sequenceNo:
             type: string
@@ -425,7 +425,7 @@ components:
         properties:
           transType:
             type: string
-            description: Type of transaction (e.g., "04" for reversal, "10" for settlement)
+            description: Type of transaction (e.g., "04" for reversal, "06" for completion, "10" for settlement, "35" for cancel)
             example: "04"
           currencyNumber:
             type: string
