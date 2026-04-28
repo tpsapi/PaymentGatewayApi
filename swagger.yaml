@@ -7,7 +7,8 @@ info:
     
   termsOfService: https://tpspay.com/terms/
   contact:
-    email: POSService@tpspay.com
+
+    email: posservice@liquid.tech
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -25,7 +26,7 @@ tags:
     description: Notifies payment system thata transaction has already occured and should be recorded, but it does not require real-time approval or denial
     
   - name: reports
-    description: used to query reports from pos terminals. reports to query include summary and batch report.
+    description: used to query reports and reprints from pos terminals. reports to query include summary, batch report, transaction reprint by reference number, and last transaction reprint.
    
  
 paths:
@@ -142,7 +143,7 @@ paths:
       tags:
         - reports
       summary: For querying transaction details from pos device.
-      description: Supported Transaction Types are as follows summary report=> "70", batch Report=> "80". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
+      description: Supported Transaction Types are as follows summary report=> "70", batch Report=> "80", reprint by transaction reference number=> "90", reprint last transaction=> "95". DeviceId to use Physical ID such as Static Mac Address on device. To always send Sequence number or unique transaction identifier from third party system. Supported request body format will be json.
       operationId: /report
       parameters:
       - name: DeviceId
@@ -156,7 +157,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: make payment authorization, refund or void
+        description: query reports or perform transaction reprints
         content:
           application/json:
             schema:
@@ -327,7 +328,7 @@ components:
           - sequenceNo
           - transAmount
           - dateTime
-          - curencyNumber
+          - currencyNumber
           - paymentType
         
     adviceResponse:
@@ -451,15 +452,15 @@ components:
           - sequenceNo
           - transAmount
           - dateTime
-          - curencyNumber
+          - currencyNumber
           
     reportsResponse:
         type: object
         properties:
           transType:
             type: string
-            description: Type of transaction (e.g., "70" for summary report, "80" for batch report)
-            example: "04"
+            description: Type of report or reprint (e.g., "70" for summary report, "80" for batch report, "90" for reprint by transaction reference number, "95" for reprint last transaction)
+            example: "70"
           sequenceNo:
             type: string
             description: Unique sequence number for the transaction. takes up to 12 characters
@@ -507,7 +508,7 @@ components:
                 required:
                   - transname
                   - transDateTime
-                  - totalAmount  
+                  - transAmount
           totals:
               type: array
               nullable: true
@@ -574,7 +575,7 @@ components:
         properties:
           transType:
             type: string
-            description: Type of transaction (e.g., "70" for summary report, "80" for batch report)
+            description: Type of report or reprint (e.g., "70" for summary report, "80" for batch report, "90" for reprint by transaction reference number, "95" for reprint last transaction)
             example: "70"
           currencyNumber:
             type: string
@@ -589,11 +590,16 @@ components:
             format: date-time
             description: ISO 8601 formatted date and time (e.g., "2025-06-22T18:30:00Z")
             example: "2025-06-22T18:30:00Z"
+          rrn:
+            type: string
+            description: Retrival Refrence Number for transaction reprint by reference number. Required when transType is "90". Not used for summary, batch, or last transaction reprint.
+            nullable: true
+            example: "123456789012"
         required:
           - transType
           - sequenceNo
           - dateTime
-          - curencyNumber
+          - currencyNumber
         
    
     Error:
@@ -613,5 +619,3 @@ components:
         - code
         - message
         - timestamp
-        
-        
